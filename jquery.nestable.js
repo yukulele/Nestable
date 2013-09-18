@@ -43,8 +43,8 @@
             placeClass      : 'dd-placeholder',
             noDragClass     : 'dd-nodrag',
             emptyClass      : 'dd-empty',
-            expandBtnHTML   : '<button data-action="expand" type="button">Expand</button>',
-            collapseBtnHTML : '<button data-action="collapse" type="button">Collapse</button>',
+            expandBtnHTML   : '<button data-action="expand"   type="button">Expand</button>',
+            collapseBtnHTML : '<button data-action="collapse" type="button">Expand</button>',
             group           : 0,
             maxDepth        : 5,
             threshold       : 20
@@ -82,10 +82,16 @@
                     action = target.data('action'),
                     item   = target.parent(list.options.itemNodeName);
                 if (action === 'collapse') {
-                    list.collapseItem(item);
+                    if(e.ctrlKey)
+                        list.collapseAll(item);
+                    else
+                        list.collapseItem(item);
                 }
                 if (action === 'expand') {
-                    list.expandItem(item);
+                    if(e.ctrlKey)
+                        list.expandAll(item);
+                    else
+                        list.expandItem(item);
                 }
             });
 
@@ -212,18 +218,28 @@
             }
         },
 
-        expandAll: function()
+        expandAll: function(li)
         {
             var list = this;
-            list.el.find(list.options.itemNodeName).each(function() {
+            if(li){
+                li = this.el;
+                list.expandItem(li);
+            }
+            li.find(list.options.itemNodeName).each(function() {
                 list.expandItem($(this));
             });
         },
 
-        collapseAll: function()
+        collapseAll: function(li)
         {
             var list = this;
-            list.el.find(list.options.itemNodeName).each(function() {
+            
+            if(li){
+                list.collapseItem(li);
+            }
+            else
+                li = this.el;
+            li.find(list.options.itemNodeName).each(function() {
                 list.collapseItem($(this));
             });
         },
@@ -231,8 +247,10 @@
         setParent: function(li)
         {
             if (li.children(this.options.listNodeName).length) {
-                li.prepend($(this.options.expandBtnHTML));
-                li.prepend($(this.options.collapseBtnHTML));
+                li.prepend(
+                    $(this.options.expandBtnHTML),
+                    $(this.options.collapseBtnHTML)
+                );
             }
             li.children('[data-action="expand"]').hide();
         },
